@@ -40,5 +40,6 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
         Laadung laadung = new Laadung();
         Thread thread = new Thread(laadung);//wrapib n-ö ära ja siis alustab tööd samaaegselt teise meetodiga
         thread.start();
+        //https://www.simplilearn.com/tutorials/java-tutorial/thread-in-java
     }
 }
