@@ -63,7 +63,7 @@ public class Kliendid implements Runnable {
         logiPrintija.close();
 
         // Ava inventarifail lisamiseks
-        FileWriter kirjuta = new FileWriter(inventar, true);
+        FileWriter kirjuta = new FileWriter(inventar, false);
         PrintWriter prindiFaili = new PrintWriter(kirjuta);
 
         // Kirjuta uuendatud inventar inventarifaili
