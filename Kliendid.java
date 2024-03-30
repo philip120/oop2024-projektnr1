@@ -104,11 +104,4 @@ public class Kliendid implements Runnable {
     private String kuupäevaVormindus() {
         return kuupäevaVormindaja.format(new Date());
     }
-
-    // Main meetod
-    public static void main(String[] args) {
-        Kliendid kliendid = new Kliendid();
-        Thread thread = new Thread(kliendid);
-        thread.start();
-    }
 }
