@@ -28,11 +28,11 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
                 for (int i = 0; i < tooted.length; i++) {//kaib iga toote labi, kirjutab toote nime toodetest[] ja siis uuendab numbrit
                     kogused[i] += random.nextInt(maksimaalne) + 1;
                     prindiFaili.println(tooted[i] + ", " + kogused[i]);
-                    System.out.println(tooted[i] + ", " + kogused[i]);
+                    //System.out.println(tooted[i] + ", " + kogused[i]);
                     if (kogused[i]<5){
                         kogused[i] += random.nextInt(maksimaalne) + 1;
                         prindiFaili.println(tooted[i] + ", " + kogused[i]);
-                        System.out.println(tooted[i] + ", " + kogused[i]);
+                        //System.out.println(tooted[i] + ", " + kogused[i]);
                     }
                 }
                 prindiFaili.close();//salvestus
