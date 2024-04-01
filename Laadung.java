@@ -8,7 +8,7 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
     private String inventar = "inventaar.txt";//fail kuhu kirjutame
     private String[] tooted = {"Piim", "Sai", "Juust", "Sink"};//erinevad tooted, saab muuta
     private int[] kogused = new int[tooted.length];//iga toote kogus
-    private int maksimaalne = 10;//maksimaalne toodete lisamine
+    private int maksimaalne = 5;//maksimaalne toodete lisamine
     private Random random = new Random();
 
 
@@ -29,6 +29,11 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
                     kogused[i] += random.nextInt(maksimaalne) + 1;
                     prindiFaili.println(tooted[i] + ", " + kogused[i]);
                     System.out.println(tooted[i] + ", " + kogused[i]);
+                    if (kogused[i]<5){
+                        kogused[i] += random.nextInt(maksimaalne) + 1;
+                        prindiFaili.println(tooted[i] + ", " + kogused[i]);
+                        System.out.println(tooted[i] + ", " + kogused[i]);
+                    }
                 }
                 prindiFaili.close();//salvestus
                 Thread.sleep(10000);//paus
