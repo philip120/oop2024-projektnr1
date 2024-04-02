@@ -1,3 +1,5 @@
+import org.w3c.dom.ls.LSOutput;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,7 +12,19 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
     private int[] kogused = new int[tooted.length];//iga toote kogus
     private int maksimaalne = 5;//maksimaalne toodete lisamine
     private Random random = new Random();
+    private double ostetudKogus;
 
+    public Laadung(double ostetudKogus) {
+        this.ostetudKogus = ostetudKogus;
+    }
+
+    public double getOstetudKogus() {
+        return ostetudKogus;
+    }
+
+    public void setOstetudKogus(double ostetudKogus) {
+        this.ostetudKogus = ostetudKogus;
+    }
 
     @Override
     public void run() {//runnable classist voetud
@@ -18,23 +32,31 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
         boolean onNeg = false;
         try {
             //alustan suvaliste arvudega 1-10(maksimaalne)
+            /*
             for (int i = 0; i < tooted.length; i++) {
                 kogused[i] = random.nextInt(maksimaalne) + 1;
             }
+            */
             // numbrite uuendamise loogika
             while (true) {
                 FileWriter kirjuta = new FileWriter(inventar, false); //append mode false, kirjutab ule mitte ei lisa: https://stackoverflow.com/questions/1225146/java-filewriter-with-append-mode
                 PrintWriter prindiFaili = new PrintWriter(kirjuta);//prindib faili
                 for (int i = 0; i < tooted.length; i++) {//kaib iga toote labi, kirjutab toote nime toodetest[] ja siis uuendab numbrit
-                    kogused[i] += random.nextInt(maksimaalne) + 1;
+                    int paevaneKogus = random.nextInt(maksimaalne) + 1;
+                    kogused[i] += paevaneKogus;
                     prindiFaili.println(tooted[i] + ", " + kogused[i]);
                     //System.out.println(tooted[i] + ", " + kogused[i]);
+                    ostetudKogus += paevaneKogus/2;
+                    setOstetudKogus(ostetudKogus);
+
+
                     if (kogused[i]<5){
                         kogused[i] += random.nextInt(maksimaalne) + 1;
                         prindiFaili.println(tooted[i] + ", " + kogused[i]);
                         //System.out.println(tooted[i] + ", " + kogused[i]);
                     }
                 }
+                System.out.println("kokku ostetud summa: "+ostetudKogus);
                 prindiFaili.close();//salvestus
                 Thread.sleep(10000);//paus
                 loendur++;
