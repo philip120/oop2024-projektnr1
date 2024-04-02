@@ -1,8 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,19 +8,36 @@ import java.util.Random;
 public class Kliendid implements Runnable {
     // Failide teekondade ja muude konstantide määratlemine
     private String inventar = "inventaar.txt"; // Inventarifail
-    private String logiFail = "tehingud.txt"; // Tehingute logifail
+    private File logiFail; // Tehingute logifail
     private String[] tooted = {"Piim", "Sai", "Juust", "Sink"}; // Olemasolevad tooted
     private int maksimum = 3; // Maksimaalne kogus, mida iga klient saab osta iga toote kohta
     private Random suvaline = new Random(); // Juhusliku arvu generaator
     private SimpleDateFormat kuupäevaVormindaja = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // Kuupäeva-vormindaja
     private int klientideLoendur = 1; // Klientide loendur, alustab esimesest kliendist
 
+    private double ostetudKlientidePoolt;
+
+    public Kliendid(double ostetudKlientidePoolt) {
+        this.ostetudKlientidePoolt = ostetudKlientidePoolt;
+    }
+
+    public double getOstetudKlientidePoolt() {
+        return ostetudKlientidePoolt;
+    }
+
+    public void setOstetudKlientidePoolt(double ostetudKlientidePoolt) {
+        this.ostetudKlientidePoolt = ostetudKlientidePoolt;
+    }
+
     @Override
     public void run() {
+        File logiFail = new File("tehingud.txt");
+        this.logiFail=logiFail;
         try {
             while (true) {
                 int klientideArv = suvaline.nextInt(10) + 1; // Juhuslik klientide arv (1 kuni 10)
                 for (int i = 0; i < klientideArv; i++) {
+
                     uuendaInventari();
                 }
                 Thread.sleep(10000); // Ootamine enne järgmist tsüklit
@@ -40,6 +53,7 @@ public class Kliendid implements Runnable {
         Map<String, Integer> inventariKaart = loeInventar();
 
         // Ava logifail kirjutamiseks
+
         FileWriter logiKirjutaja = new FileWriter(logiFail, true);
         PrintWriter logiPrintija = new PrintWriter(logiKirjutaja);
         logiPrintija.println(kuupäevaVormindaja.format(new Date()) + " Toimusid tehingud: ");
@@ -47,6 +61,9 @@ public class Kliendid implements Runnable {
         for (String toode : tooted) {
             // Juhuslik kogus, mida iga klient ostab (0 kuni maksimum)
             int ostetudKogus = suvaline.nextInt(maksimum + 1);
+            ostetudKlientidePoolt+=ostetudKogus;
+            setOstetudKlientidePoolt(ostetudKlientidePoolt);
+            System.out.println("kokku ostetud summa klientide poolt: "+ostetudKlientidePoolt);
 
             // Kirjuta tehingu info logifaili
             logiPrintija.println(klientideLoendur + ". Klient ostis " + ostetudKogus + " " + toode);
@@ -90,7 +107,11 @@ public class Kliendid implements Runnable {
             if (osad.length == 2) {
                 String toode = osad[0];
                 int kogus = Integer.parseInt(osad[1]);
-                inventariKaart.put(toode, kogus);
+                if(kogus ==0){
+                    continue;
+                }else {
+                    inventariKaart.put(toode, kogus);
+                }
             }
         }
         // Sulge fail
