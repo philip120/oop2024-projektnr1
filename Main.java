@@ -28,9 +28,9 @@ public class Main {
         System.out.println("Sisesta raha: ");
         int raha = scanner.nextInt();
 
-        Laadung laadung = new Laadung();
+        Laadung laadung = new Laadung(0);
         Thread thread = new Thread(laadung);//wrapib n-ö ära ja siis alustab tööd samaaegselt teise meetodiga
-        Kliendid kliendid=new Kliendid();
+        Kliendid kliendid=new Kliendid(0);
         Thread thread2 =new Thread(kliendid);
         thread.start();
         thread2.start();
