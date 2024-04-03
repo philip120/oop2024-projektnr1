@@ -1,68 +1,52 @@
-import org.w3c.dom.ls.LSOutput;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Random;
 
-public class Laadung implements Runnable {//peab runnable kasutama, et saaks threadi samal ajal jooksutada
+public class Laadung implements Runnable {
 
-    private String inventar = "inventaar.txt";//fail kuhu kirjutame
-    private String[] tooted = {"Piim", "Sai", "Juust", "Sink"};//erinevad tooted, saab muuta
-    private int[] kogused = new int[tooted.length];//iga toote kogus
-    private int maksimaalne = 5;//maksimaalne toodete lisamine
+
+    private String inventar = "inventaar.txt";
+    private String[] tooted = {"Piim", "Sai", "Juust", "Sink"};
+    private int[] kogused = new int[tooted.length];
+    private int maksimaalne = 500;
     private Random random = new Random();
-    private double ostetudKogus;
+    private static double ostetudKogus = 0;
 
     public Laadung(double ostetudKogus) {
         this.ostetudKogus = ostetudKogus;
     }
 
-    public double getOstetudKogus() {
+    public static double getOstetudKogus() {
         return ostetudKogus;
     }
 
-    public void setOstetudKogus(double ostetudKogus) {
-        this.ostetudKogus = ostetudKogus;
-    }
-
     @Override
-    public void run() {//runnable classist voetud
+    public void run() {
         int loendur = 0;
         boolean onNeg = false;
         try {
-            //alustan suvaliste arvudega 1-10(maksimaalne)
-            /*
-            for (int i = 0; i < tooted.length; i++) {
-                kogused[i] = random.nextInt(maksimaalne) + 1;
-            }
-            */
-            // numbrite uuendamise loogika
+
             while (true) {
-                FileWriter kirjuta = new FileWriter(inventar, false); //append mode false, kirjutab ule mitte ei lisa: https://stackoverflow.com/questions/1225146/java-filewriter-with-append-mode
-                PrintWriter prindiFaili = new PrintWriter(kirjuta);//prindib faili
-                for (int i = 0; i < tooted.length; i++) {//kaib iga toote labi, kirjutab toote nime toodetest[] ja siis uuendab numbrit
-                    int paevaneKogus = random.nextInt(maksimaalne) + 1;
-                    kogused[i] += paevaneKogus;
+                FileWriter kirjuta = new FileWriter(inventar, false);
+                PrintWriter prindiFaili = new PrintWriter(kirjuta);
+                double uuedTooted = 0; // Variable to store total bought products for each 10-second interval
+                for (int i = 0; i < tooted.length; i++) {
+                    int ostukogus = random.nextInt(maksimaalne) + 1;
+                    double sisseostmisehind = ostukogus * 0.5;
+                    uuedTooted += sisseostmisehind; // Increment the count of newly added products
+                    kogused[i] += ostukogus;
+                    ostetudKogus += sisseostmisehind;
                     prindiFaili.println(tooted[i] + ", " + kogused[i]);
+
                     //System.out.println(tooted[i] + ", " + kogused[i]);
-                    ostetudKogus += paevaneKogus/2;
-                    setOstetudKogus(ostetudKogus);
-
-
-                    if (kogused[i]<5){
-                        kogused[i] += random.nextInt(maksimaalne) + 1;
-                        prindiFaili.println(tooted[i] + ", " + kogused[i]);
-                        //System.out.println(tooted[i] + ", " + kogused[i]);
-                    }
                 }
-                System.out.println("kokku ostetud summa: "+ostetudKogus);
-                prindiFaili.close();//salvestus
-                Thread.sleep(10000);//paus
+                prindiFaili.close();
+                Thread.sleep(10000);
                 loendur++;
-                System.out.println("Päevi möödas:"+ loendur);
-
-                //negatiivsuse check
+                System.out.println("Päevi möödas:" + loendur);
+                System.out.println("Tänase päeva kulud: " + uuedTooted); // Print the count of newly added products
+                System.out.println("Kogukulu pärast " + loendur + " päeva: " + ostetudKogus); // Print total bought products during each 10-second interval
                 for (int i = 0; i < kogused.length; i++) {
                     if (kogused[i] < 0) {
                         onNeg = true;
@@ -73,6 +57,6 @@ public class Laadung implements Runnable {//peab runnable kasutama, et saaks thr
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        }//errori puudmine
+        }
     }
 }

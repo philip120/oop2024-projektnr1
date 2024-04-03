@@ -1,128 +1,139 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Kliendid implements Runnable {
-    // Failide teekondade ja muude konstantide määratlemine
-    private String inventar = "inventaar.txt"; // Inventarifail
-    private File logiFail; // Tehingute logifail
-    private String[] tooted = {"Piim", "Sai", "Juust", "Sink"}; // Olemasolevad tooted
-    private int maksimum = 3; // Maksimaalne kogus, mida iga klient saab osta iga toote kohta
-    private Random suvaline = new Random(); // Juhusliku arvu generaator
-    private SimpleDateFormat kuupäevaVormindaja = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // Kuupäeva-vormindaja
-    private int klientideLoendur = 1; // Klientide loendur, alustab esimesest kliendist
+    private String inventar = "inventaar.txt";
+    private String logiFail = "tehingud.txt";
+    private String[] tooted = {"Piim", "Sai", "Juust", "Sink"};
+    private int maksimum = 3;
+    private Random suvaline = new Random();
+    private int esialgneKlientideArv;
+    private SimpleDateFormat kuupäevaVormindaja = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private int klientideLoendur = 1;
+    private int koguKülastajateArv = 0;
+    private double koguToodeteRahasumma = 0; //kõik tooted, mida poest on ostetud
 
-    private double ostetudKlientidePoolt;
+    private double tooteHind;
 
-    public Kliendid(double ostetudKlientidePoolt) {
-        this.ostetudKlientidePoolt = ostetudKlientidePoolt;
+    private double koguKasum;
+
+    public Kliendid(int esialgneKlientideArv,double tooteHind) {
+        this.esialgneKlientideArv = esialgneKlientideArv;
+        this.tooteHind = tooteHind;
+        this.koguKasum = 0;
     }
 
-    public double getOstetudKlientidePoolt() {
-        return ostetudKlientidePoolt;
+    public double getKoguKasum() {
+        return koguKasum;
     }
 
-    public void setOstetudKlientidePoolt(double ostetudKlientidePoolt) {
-        this.ostetudKlientidePoolt = ostetudKlientidePoolt;
+    public void setKoguKasum(double koguKasum) {
+        this.koguKasum = koguKasum;
+    }
+
+    public double getTooteHind() {
+        return tooteHind;
+    }
+
+    public void setTooteHind(double tooteHind) {
+        this.tooteHind = tooteHind;
+    }
+
+    public int getEsialgneKlientideArv() {
+        return esialgneKlientideArv;
+    }
+
+    public void setEsialgneKlientideArv(int esialgneKlientideArv) {
+        this.esialgneKlientideArv = esialgneKlientideArv;
     }
 
     @Override
     public void run() {
-        File logiFail = new File("tehingud.txt");
-        this.logiFail=logiFail;
         try {
             while (true) {
-                int klientideArv = suvaline.nextInt(10) + 1; // Juhuslik klientide arv (1 kuni 10)
-                for (int i = 0; i < klientideArv; i++) {
 
-                    uuendaInventari();
+                int klientideArv = suvaline.nextInt(esialgneKlientideArv) + 1;
+                koguKülastajateArv += klientideArv; // Update total number of clients visited
+                int ostetudToodeteArv = 0; // päevane poest ostetud toodete arv
+                for (int i = 0; i < klientideArv; i++) {
+                    int ostetudTooted = uuendaInventari();
+
+                    ostetudToodeteArv += ostetudTooted;
+                    koguToodeteRahasumma += ostetudTooted * tooteHind; // lisa need tooted kogu klientide ostetud arvule
                 }
-                Thread.sleep(10000); // Ootamine enne järgmist tsüklit
+                double ostetudKogus = Laadung.getOstetudKogus();
+                //double koguKasum = koguToodeteRahasumma - ostetudKogus;
+                setKoguKasum(koguToodeteRahasumma - ostetudKogus);
+                System.out.println(kuupäevaVormindaja.format(new Date()) + " - Külastajate arv: " + klientideArv + ", Klientidelt teenitud tulu kokku: " + ostetudToodeteArv + " eurot.");
+                System.out.println("Jooksev kasum: " + getKoguKasum() + " eurot.");
+                Thread.sleep(10000);
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    // Meetod inventari uuendamiseks vastavalt klientide ostudele
-    private void uuendaInventari() throws IOException {
-        // Lae inventarifailist praegune inventar
-        Map<String, Integer> inventariKaart = loeInventar();
-
-        // Ava logifail kirjutamiseks
-
+    private int uuendaInventari() throws IOException {
         FileWriter logiKirjutaja = new FileWriter(logiFail, true);
         PrintWriter logiPrintija = new PrintWriter(logiKirjutaja);
         logiPrintija.println(kuupäevaVormindaja.format(new Date()) + " Toimusid tehingud: ");
-        // Käi läbi iga toode
-        for (String toode : tooted) {
-            // Juhuslik kogus, mida iga klient ostab (0 kuni maksimum)
-            int ostetudKogus = suvaline.nextInt(maksimum + 1);
-            ostetudKlientidePoolt+=ostetudKogus;
-            setOstetudKlientidePoolt(ostetudKlientidePoolt);
-            System.out.println("kokku ostetud summa klientide poolt: "+ostetudKlientidePoolt);
 
-            // Kirjuta tehingu info logifaili
-            logiPrintija.println(klientideLoendur + ". Klient ostis " + ostetudKogus + " " + toode);
-
-            // Võta praegune kogus inventarifailist
-            int praeguneKogus = inventariKaart.getOrDefault(toode, 0);
-            // Arvuta uus kogus, võttes arvesse klientide ostusid
-            int uusKogus = Math.max(praeguneKogus - ostetudKogus, 0);
-            // Uuenda kaarti uue kogusega
-            inventariKaart.put(toode, uusKogus);
-        }
-
-        // Sulge logifail
-        logiPrintija.close();
-
-        // Ava inventarifail lisamiseks
         FileWriter kirjuta = new FileWriter(inventar, false);
         PrintWriter prindiFaili = new PrintWriter(kirjuta);
 
-        // Kirjuta uuendatud inventar inventarifaili
-        for (Map.Entry<String, Integer> sissekanne : inventariKaart.entrySet()) {
-            prindiFaili.println(sissekanne.getKey() + ", " + sissekanne.getValue());
+        int ostetudToodeteArv = 0; // Variable to store total number of products purchased by the client
+        for (int i = 0; i < tooted.length; i++) {
+            //System.out.println(Arrays.toString(tooted));
+            // Read the current amount of the product from the file
+            int praeguneKogus = loeInventar(tooted[i]);
+            //System.out.println(tooted[i]);
+            //System.out.println(praeguneKogus);
+            int ostukogus = suvaline.nextInt(maksimum) + 1;
+            ostetudToodeteArv += ostukogus; // Increment the count of total products purchased by the client
+
+            // Subtract the bought quantity from the current amount and write the new amount to the file
+            int uusKogus = praeguneKogus - ostukogus;
+            prindiFaili.println(tooted[i] + ", " + uusKogus); // Write the new amount to the inventory file
+            logiPrintija.println(klientideLoendur + ". Klient ostis " + ostukogus + " " + tooted[i]);
         }
 
-        // Sulge fail
+        logiPrintija.close();
+        logiKirjutaja.close();
         prindiFaili.close();
-
-        // Suurenda klientide loendurit järgmise ostu jaoks
+        kirjuta.close();
         klientideLoendur++;
+        return ostetudToodeteArv;
     }
 
-    // Meetod inventarifailist inventari lugemiseks ja kaardi tagastamiseks
-    private Map<String, Integer> loeInventar() throws IOException {
-        Map<String, Integer> inventariKaart = new HashMap<>();
+    private int loeInventar(String toode) throws IOException {
 
-        // Ava inventarifail lugemiseks
-        BufferedReader lugeja = new BufferedReader(new FileReader(inventar));
-        String rida;
-        while ((rida = lugeja.readLine()) != null) {
-            String[] osad = rida.split(", ");
-            if (osad.length == 2) {
-                String toode = osad[0];
-                int kogus = Integer.parseInt(osad[1]);
-                if(kogus ==0){
-                    continue;
-                }else {
-                    inventariKaart.put(toode, kogus);
+        try (Scanner lugeja = new Scanner(new File("inventaar.txt"), "UTF-8")) {
+            while (lugeja.hasNextLine()) {
+                String rida = lugeja.nextLine();
+                //System.out.println(rida);
+                String[] osad = rida.split(", ");
+                //System.out.println(osad[0]);
+                //System.out.println(osad[1]);
+                if (osad[0].equals(toode)) {
+                    int praeguneKogus = Integer.parseInt(osad[1]);
+                    return praeguneKogus;
                 }
             }
         }
-        // Sulge fail
-        lugeja.close();
+        return 0;
 
-        // Tagasta kaart
-        return inventariKaart;
     }
 
-    // Meetod praeguse kuupäeva ja kellaaja vormindamiseks
-    private String kuupäevaVormindus() {
-        return kuupäevaVormindaja.format(new Date());
-    }
+
+
 }

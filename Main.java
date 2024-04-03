@@ -22,40 +22,48 @@ public class Main {
 
     public static void main(String[] args) throws Exception{//kasutades runnable interface saame mitu threadi(lõime) korraga kasutada
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Sisesta nimi: ");
-        String nimi = scanner.nextLine();
+        System.out.println("Vali algkapital.");
+        int algkapital = scanner.nextInt();
+        Omanik omanik = new Omanik(algkapital);
 
-        System.out.println("Sisesta raha: ");
-        int raha = scanner.nextInt();
+
 
         Laadung laadung = new Laadung(0);
         Thread thread = new Thread(laadung);//wrapib n-ö ära ja siis alustab tööd samaaegselt teise meetodiga
-        Kliendid kliendid=new Kliendid(0);
+
+        Kliendid kliendid=new Kliendid(10, 1);
         Thread thread2 =new Thread(kliendid);
         thread.start();
+        Thread.sleep(5000);
         thread2.start();
 
-        Kasutaja kasutaja = new Kasutaja(nimi,raha);
         while (true){
-            System.out.println("Kas soovid poodi minna? (y/n) ");
-            String vastus = scanner.nextLine();
-
-            if("y".equalsIgnoreCase(vastus)){
-                List<String> saadaolevadTooted  = loeTooted("inventaar.txt");
-                System.out.println("Mida soovid osta? Saadaolevad tooted: " + saadaolevadTooted);
-                String toode = scanner.nextLine();
-                if (saadaolevadTooted.contains(toode)) {
-                    kasutaja.lisaTooted(toode);
-                    System.out.println(toode + " lisatud!");
-                    System.out.println(kasutaja.getTooted());
-                }else{
-                    System.out.println("Toodet ei ole saadaval või on otsas.");
-                }
-            } else if ("n".equalsIgnoreCase(vastus)) {
-                System.out.println("Järgmise päevani!");
-            } else {
-                System.out.println("palun vasta y või n");
+            double kogukasum = kliendid.getKoguKasum();
+            int algkapital2 = omanik.getRaha();
+            if (kogukasum + algkapital2 < 0) {
+                System.out.println("Pood läks pankrotti");
+                System.exit(0);
             }
+            System.out.println("Mida soovid teha? r(reklaami) h(Hinda muuta) ");
+            String  vastus = scanner.nextLine();
+            if ("r".equalsIgnoreCase(vastus)) {
+                int esialgne = kliendid.getEsialgneKlientideArv();
+                int uus = esialgne + 10;
+                kliendid.setEsialgneKlientideArv(uus);
+               // System.out.println(kliendid.getEsialgneKlientideArv());
+            } else if ("h".equalsIgnoreCase(vastus)) {
+                double endineKordaja = kliendid.getTooteHind();
+                double uusKordaja = endineKordaja + 0.1;
+                kliendid.setTooteHind(uusKordaja);
+                //System.out.println(kliendid.getTooteHind());
+                int esialgne = kliendid.getEsialgneKlientideArv();
+                int uus = esialgne -2;
+                kliendid.setEsialgneKlientideArv(uus);
+                //System.out.println(kliendid.getEsialgneKlientideArv());
+            }
+
+
+
         }
 
 
