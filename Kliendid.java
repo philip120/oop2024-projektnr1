@@ -15,7 +15,7 @@ public class Kliendid implements Runnable {
     private String inventar = "inventaar.txt";
     private String logiFail = "tehingud.txt";
     private String[] tooted = {"Piim", "Sai", "Juust", "Sink"};
-    private int maksimum = 3;
+    private int maksimum = 3; //maksimaalne toodete arv mida üks klient saab korraga osta
     private Random suvaline = new Random();
     private int esialgneKlientideArv;
     private SimpleDateFormat kuupäevaVormindaja = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -23,9 +23,9 @@ public class Kliendid implements Runnable {
     private int koguKülastajateArv = 0;
     private double koguToodeteRahasumma = 0; //kõik tooted, mida poest on ostetud
 
-    private double tooteHind;
+    private double tooteHind; //Kordaja, millega pood tooteid edasi müüb
 
-    private double koguKasum;
+    private double koguKasum; //Kui palju on pood kasumit teeninud
 
     public Kliendid(int esialgneKlientideArv,double tooteHind) {
         this.esialgneKlientideArv = esialgneKlientideArv;
@@ -63,7 +63,7 @@ public class Kliendid implements Runnable {
             while (true) {
 
                 int klientideArv = suvaline.nextInt(esialgneKlientideArv) + 1;
-                koguKülastajateArv += klientideArv; // Update total number of clients visited
+                koguKülastajateArv += klientideArv; // Uuendada kogu klientide arvu
                 int ostetudToodeteArv = 0; // päevane poest ostetud toodete arv
                 for (int i = 0; i < klientideArv; i++) {
                     int ostetudTooted = uuendaInventari();
@@ -71,11 +71,12 @@ public class Kliendid implements Runnable {
                     ostetudToodeteArv += ostetudTooted;
                     koguToodeteRahasumma += ostetudTooted * tooteHind; // lisa need tooted kogu klientide ostetud arvule
                 }
-                double ostetudKogus = Laadung.getOstetudKogus();
+                double ostetudKogus = Laadung.getOstetudKogus(); //See kui palju on kauplus tooteid sisse ostnud
                 //double koguKasum = koguToodeteRahasumma - ostetudKogus;
                 setKoguKasum(koguToodeteRahasumma - ostetudKogus);
                 System.out.println(kuupäevaVormindaja.format(new Date()) + " - Külastajate arv: " + klientideArv + ", Klientidelt teenitud tulu kokku: " + ostetudToodeteArv + " eurot.");
                 System.out.println("Jooksev kasum: " + getKoguKasum() + " eurot.");
+
                 Thread.sleep(10000);
             }
         } catch (IOException | InterruptedException e) {
@@ -83,6 +84,11 @@ public class Kliendid implements Runnable {
         }
     }
 
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
     private int uuendaInventari() throws IOException {
         FileWriter logiKirjutaja = new FileWriter(logiFail, true);
         PrintWriter logiPrintija = new PrintWriter(logiKirjutaja);
@@ -91,20 +97,20 @@ public class Kliendid implements Runnable {
         FileWriter kirjuta = new FileWriter(inventar, false);
         PrintWriter prindiFaili = new PrintWriter(kirjuta);
 
-        int ostetudToodeteArv = 0; // Variable to store total number of products purchased by the client
-        for (int i = 0; i < tooted.length; i++) {
+        int ostetudToodeteArv = 0; // Ühe kliendi kogu ostetud toodete arv
+        for (int i = 0; i < tooted.length; i++) { //Käib selle tsükli läbi iga toote kohta poes
             //System.out.println(Arrays.toString(tooted));
-            // Read the current amount of the product from the file
-            int praeguneKogus = loeInventar(tooted[i]);
+
+            int praeguneKogus = loeInventar(tooted[i]); //Loeb praeguse toodete arvu failist
             //System.out.println(tooted[i]);
             //System.out.println(praeguneKogus);
-            int ostukogus = suvaline.nextInt(maksimum) + 1;
-            ostetudToodeteArv += ostukogus; // Increment the count of total products purchased by the client
+            int ostukogus = suvaline.nextInt(maksimum) + 1;  //Genereerib suvailse arvu 0-3, kui palju käesolev klient seda toodet ostab
+            ostetudToodeteArv += ostukogus; // Lisab selle ühe toote koguse kogu ostetud toodete arvule
 
-            // Subtract the bought quantity from the current amount and write the new amount to the file
-            int uusKogus = praeguneKogus - ostukogus;
-            prindiFaili.println(tooted[i] + ", " + uusKogus); // Write the new amount to the inventory file
-            logiPrintija.println(klientideLoendur + ". Klient ostis " + ostukogus + " " + tooted[i]);
+
+            int uusKogus = praeguneKogus - ostukogus; // Lahutab praegusest kogusest kliendi ostetud koguse
+            prindiFaili.println(tooted[i] + ", " + uusKogus); //Lisab uue  koguse faili
+            logiPrintija.println(klientideLoendur + ". Klient ostis " + ostukogus + " " + tooted[i]); //kirjutab tehingute faili, kui palju midagi see klient  ostis
         }
 
         logiPrintija.close();
@@ -115,6 +121,12 @@ public class Kliendid implements Runnable {
         return ostetudToodeteArv;
     }
 
+    /**
+     *
+     * @param toode  , mille praeguse koguse meetod praegu failist loeb
+     * @return tagastab selle toote koguse failis
+     * @throws IOException
+     */
     private int loeInventar(String toode) throws IOException {
 
         try (Scanner lugeja = new Scanner(new File("inventaar.txt"), "UTF-8")) {
@@ -131,9 +143,5 @@ public class Kliendid implements Runnable {
             }
         }
         return 0;
-
     }
-
-
-
 }

@@ -40,11 +40,11 @@ public class Main {
         while (true){
             double kogukasum = kliendid.getKoguKasum();
             int algkapital2 = omanik.getRaha();
-            if (kogukasum + algkapital2 < 0) {
+            if (kogukasum + algkapital2 < 0) { // kontrollib kas on algkapital on läinud
                 System.out.println("Pood läks pankrotti");
                 System.exit(0);
             }
-            System.out.println("Mida soovid teha? r(reklaami) h(Hinda muuta) ");
+            System.out.println("Mida soovid teha? sisestaga r(reklaami) või h(Hinda tõsta) PS. hooliv poeomanik tegeleb iga päev oma poega.");
             String  vastus = scanner.nextLine();
             if ("r".equalsIgnoreCase(vastus)) {
                 int esialgne = kliendid.getEsialgneKlientideArv();
@@ -52,11 +52,11 @@ public class Main {
                 kliendid.setEsialgneKlientideArv(uus);
                // System.out.println(kliendid.getEsialgneKlientideArv());
             } else if ("h".equalsIgnoreCase(vastus)) {
-                double endineKordaja = kliendid.getTooteHind();
+                double endineKordaja = kliendid.getTooteHind(); //edasimüümise kordaja tõstmine 0.1 võrra
                 double uusKordaja = endineKordaja + 0.1;
                 kliendid.setTooteHind(uusKordaja);
                 //System.out.println(kliendid.getTooteHind());
-                int esialgne = kliendid.getEsialgneKlientideArv();
+                int esialgne = kliendid.getEsialgneKlientideArv(); //hinna tõstmine vähendab potentsiaalsete klientide arvu
                 int uus = esialgne -2;
                 kliendid.setEsialgneKlientideArv(uus);
                 //System.out.println(kliendid.getEsialgneKlientideArv());

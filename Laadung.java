@@ -9,9 +9,9 @@ public class Laadung implements Runnable {
     private String inventar = "inventaar.txt";
     private String[] tooted = {"Piim", "Sai", "Juust", "Sink"};
     private int[] kogused = new int[tooted.length];
-    private int maksimaalne = 500;
+    private int maksimaalne = 500; //maksimaalne toodete arv mida sisseosta saab
     private Random random = new Random();
-    private static double ostetudKogus = 0;
+    private static double ostetudKogus = 0;  //kogu sisseostetud toodete arv
 
     public Laadung(double ostetudKogus) {
         this.ostetudKogus = ostetudKogus;
@@ -30,11 +30,11 @@ public class Laadung implements Runnable {
             while (true) {
                 FileWriter kirjuta = new FileWriter(inventar, false);
                 PrintWriter prindiFaili = new PrintWriter(kirjuta);
-                double uuedTooted = 0; // Variable to store total bought products for each 10-second interval
+                double uuedTooted = 0;
                 for (int i = 0; i < tooted.length; i++) {
                     int ostukogus = random.nextInt(maksimaalne) + 1;
                     double sisseostmisehind = ostukogus * 0.5;
-                    uuedTooted += sisseostmisehind; // Increment the count of newly added products
+                    uuedTooted += sisseostmisehind;
                     kogused[i] += ostukogus;
                     ostetudKogus += sisseostmisehind;
                     prindiFaili.println(tooted[i] + ", " + kogused[i]);
@@ -45,8 +45,8 @@ public class Laadung implements Runnable {
                 Thread.sleep(10000);
                 loendur++;
                 System.out.println("Päevi möödas:" + loendur);
-                System.out.println("Tänase päeva kulud: " + uuedTooted); // Print the count of newly added products
-                System.out.println("Kogukulu pärast " + loendur + " päeva: " + ostetudKogus); // Print total bought products during each 10-second interval
+                System.out.println("Tänase päeva kulud: " + uuedTooted);
+                System.out.println("Kogukulu pärast " + loendur + " päeva: " + ostetudKogus);
                 for (int i = 0; i < kogused.length; i++) {
                     if (kogused[i] < 0) {
                         onNeg = true;
