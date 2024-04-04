@@ -21,8 +21,14 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception{//kasutades runnable interface saame mitu threadi(lõime) korraga kasutada
+        System.out.println("Poe simulatsioon.");
+        System.out.println("Tegime projekti, kus omanik peab enda poodi ülal pidama samal ajal kui inimesed ostlevad");
+        System.out.println("Kasutaja ülesanne on teha mõned otsused, et pood kasumlikuks teha.");
+        System.out.println("Alguses küsitakse poe algkapitali, mis ei tohi olla väiksem kui poe kasum");
+        System.out.println("Et poodi juhtida on omanikul iga hetk võimalik otsustada, et teha reklaami või tõsta hindu");
+        System.out.println("Alustuseks vali algkapital ning alusta simulatsiooni!");
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Vali algkapital.");
+        System.out.println("Vali algkapital.(kirjuta number)");
         int algkapital = scanner.nextInt();
         Omanik omanik = new Omanik(algkapital);
 
@@ -50,7 +56,10 @@ public class Main {
                 int esialgne = kliendid.getEsialgneKlientideArv();
                 int uus = esialgne + 10;
                 kliendid.setEsialgneKlientideArv(uus);
-               // System.out.println(kliendid.getEsialgneKlientideArv());
+                //EI TOOOOTA!
+                double summa = kliendid.getKoguKasum();
+                kliendid.setKoguKasum(summa-50);
+                // System.out.println(kliendid.getEsialgneKlientideArv());
             } else if ("h".equalsIgnoreCase(vastus)) {
                 double endineKordaja = kliendid.getTooteHind(); //edasimüümise kordaja tõstmine 0.1 võrra
                 double uusKordaja = endineKordaja + 0.1;
